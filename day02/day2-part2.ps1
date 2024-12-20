@@ -18,7 +18,6 @@ function CheckReport {
         [string]$Report
     )
     $Safe=$true # A Report is Safe until we decide it's not
-    $Return=""
     $LastLevel=$null # The Last Level
     $Direction=$null # The Last Direction
     #Loop through each level in the report
@@ -49,10 +48,8 @@ function CheckReport {
             }
         }
         $LastLevel=$Level
-        #If this was safe, add this level to th return string
-        if ($safe){$Return+=$LevelString+" "}
     }
-    Return $Return.Trim(" ")
+    Return $safe
 }
 
 
@@ -66,28 +63,39 @@ $SafeReports=0
 #Loop Through Lines (Reports)
 Foreach ($Report in $InputData){
     
-    #If the record is safe increment the counter
-    $FirstResult=(CheckReport -Report $Report)
-    If ($FirstResult -eq $Report){
-        #Safe First Time
-        $SafeReports++
-        "Safe First Time"
-    } else {
-        #Lets try that once more.
-        #TODO NEED TO ADD THE end of the original record back in here!!
-        $FirstResult
-        $NewReport=$FirstResult+ $report.Substring($FirstResult.length)
-        $NewReport
-        $SecondResult=(CheckReport -Report $NewReport)
-        If ($NewReport -eq $SecondResult){
-            #Safe Second Time
+    # #If the record is safe increment the counter
+    # $FirstResult=(CheckReport -Report $Report)
+    # If ($FirstResult -eq $Report){
+    #     #Safe First Time
+    #     $SafeReports++
+    #     "Safe First Time"
+    # } else {
+    #     #Lets try that once more.
+    #     #TODO NEED TO ADD THE end of the original record back in here!!
+    #     $FirstResult
+    #     $NewReport=$FirstResult+ $report.Substring($FirstResult.length)
+    #     $NewReport
+    #     $SecondResult=(CheckReport -Report $NewReport)
+    #     If ($NewReport -eq $SecondResult){
+    #         #Safe Second Time
+    #         $SafeReports++
+    #         "Safe Second Time"
+    #     } else {
+    #         "Unsafe"
+    #     }
+    # }
+        if (CheckReport -Report $Report){
+            #Safe without removing any level
             $SafeReports++
-            "Safe Second Time"
         } else {
-            "Unsafe"
+            #try removing one level from the report at the time until we get a result
+            $lastStart=0
+            while ($laststart -lt $report.LastIndexOf(" ")-1){
+                $laststart
+                $report.Substring(0,$report.IndexOf(" ",$laststart))+$report.Substring($report.IndexOf(" ",$laststart+2))
+                $laststart=$report.IndexOf(" ",$laststart)+1
+            }
         }
-    }
-        
     
     
 
