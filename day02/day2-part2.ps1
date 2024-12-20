@@ -17,7 +17,7 @@ function CheckReport {
     param (
         [string]$Report
     )
-    Write-Host $Report
+    #Write-Host $Report
     $Safe=$true # A Report is Safe until we decide it's not
     $LastLevel=$null # The Last Level
     $Direction=$null # The Last Direction
