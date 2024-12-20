@@ -17,6 +17,7 @@ function CheckReport {
     param (
         [string]$Report
     )
+    Write-Host $Report
     $Safe=$true # A Report is Safe until we decide it's not
     $LastLevel=$null # The Last Level
     $Direction=$null # The Last Direction
@@ -55,46 +56,35 @@ function CheckReport {
 
 
 #Read in the data
-$InputData=(Get-Content .\day2-sample.txt)
+$InputData=(Get-Content .\day2.txt)
 
 #A running total of Safe Reports
 $SafeReports=0
 
 #Loop Through Lines (Reports)
-Foreach ($Report in $InputData){
-    
-    # #If the record is safe increment the counter
-    # $FirstResult=(CheckReport -Report $Report)
-    # If ($FirstResult -eq $Report){
-    #     #Safe First Time
-    #     $SafeReports++
-    #     "Safe First Time"
-    # } else {
-    #     #Lets try that once more.
-    #     #TODO NEED TO ADD THE end of the original record back in here!!
-    #     $FirstResult
-    #     $NewReport=$FirstResult+ $report.Substring($FirstResult.length)
-    #     $NewReport
-    #     $SecondResult=(CheckReport -Report $NewReport)
-    #     If ($NewReport -eq $SecondResult){
-    #         #Safe Second Time
-    #         $SafeReports++
-    #         "Safe Second Time"
-    #     } else {
-    #         "Unsafe"
-    #     }
-    # }
-        if (CheckReport -Report $Report){
+Foreach ($Report in $InputData){ 
+           if (CheckReport -Report $Report){
             #Safe without removing any level
             $SafeReports++
         } else {
             #try removing one level from the report at the time until we get a result
             $lastStart=0
-            while ($laststart -lt $report.LastIndexOf(" ")-1){
-                $laststart
-                $report.Substring(0,$report.IndexOf(" ",$laststart))+$report.Substring($report.IndexOf(" ",$laststart+2))
-                $laststart=$report.IndexOf(" ",$laststart)+1
+            $safe=$false
+            #Check the Report with the first Level missing
+            if  (CheckReport -report $report.substring($report.indexof(" ")).trim()){$safe=$true}
+            while ($laststart -lt $report.LastIndexOf(" ")-1 -and !$safe){
+                $NewReport=$report.Substring(0,$report.IndexOf(" ",$laststart))+$report.Substring($report.IndexOf(" ",$laststart+2))
+                
+                if (CheckReport -Report $NewReport){
+                    $safe=$true
+                   # $NewReport
+                }
+                $laststart=$report.IndexOf(" ",$laststart+1)
+
             }
+            #And Finally, check the Report with the last Level missing
+            if (!$safe -and (CheckReport -report $report.substring(0,$report.lastindexof(" ")).trim())){$safe=$true}
+            if ($safe){$SafeReports++}
         }
     
     
@@ -103,3 +93,4 @@ Foreach ($Report in $InputData){
 
 
 "$SafeReports Reports are Safe"
+
